@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            #name, #model {
+                border: 0px;
+                padding: 0px;
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <div>
+                <label for="name">Project Name:</label>
+                <input id="name" name="name"><br>
+            </div>
+            <div>
+                <label for="model">Project Model:</label>
+                <select id="model" name="model" size=10></select>
+            </div>
+            <button id="create">Create Project</button>
+            <button id="cancel">Cancel</button>
+        </div>
+        <script>
+            const vscode = acquireVsCodeApi();
+            window.addEventListener('message', event => {
+                const message = event.data;
+                switch (message.command) {
+                    case 'init':
+                        const model = document.getElementById('model');
+                        for (const [name, value] of Object.entries(message.models)) {
+                            const option = document.createElement('option');
+                            option.value = name;
+                            option.text = name;
+                            model.appendChild(option);
+                        }
+                        break;
+                }
+            });
+            document.getElementById('create').onclick = () => {
+                const name = document.getElementById('name').value;
+                const model = document.getElementById('model').value;
+                vscode.postMessage({
+                    command: 'createProject',
+                    name,
+                    model
+                });
+            };
+            document.getElementById('cancel').onclick = () => {
+                vscode.postMessage({
+                    command: 'cancel'
+                });
+            };
+        </script>
+    </body>
+</html>
