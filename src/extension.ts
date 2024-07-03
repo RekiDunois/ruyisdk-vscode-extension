@@ -109,7 +109,6 @@ function venvInit(context: vscode.ExtensionContext) {
 
 		const toolchains = await ruyisdk.toolchains();
 		const toolchain = await vscode.window.showQuickPick(toolchains.map(toolchain => ({
-			element: toolchain,
 			label: toolchain.name,
 			detail: toolchain.vers[0].pm.toolchain.target
 		})), {
@@ -119,11 +118,10 @@ function venvInit(context: vscode.ExtensionContext) {
 
 		const sysroots = toolchains.filter(toolchain => toolchain.vers[0].pm.toolchain.included_sysroot);
 		const sysroot = await vscode.window.showQuickPick(sysroots.map(sysroot => ({
-			element: sysroot,
 			label: sysroot.name
-		}), {
-			placeHolder: 'Select sysroot',
-		}));
+		})), {
+			placeHolder: 'Select sysroot from',
+		});
 		if (!sysroot) return;
 
 		const name = await vscode.window.showInputBox({
@@ -175,22 +173,20 @@ function projectInit(context: vscode.ExtensionContext) {
 		}
 
 		const sources = await ruyisdk.sources();
-		const sourceName = await vscode.window.showQuickPick(
-			sources.map(source => source.name),
-			{
-				placeHolder: 'Select a source'
-			}
-		);
-		const source = sources.find(source => source.name === sourceName);
+		const source = await vscode.window.showQuickPick(sources.map(source => ({
+			label: source.name,
+		}), {
+			placeHolder: 'Select a source'
+		}));
 		if (!source) return;
 
 		const path = vscode.workspace.workspaceFolders[0].uri;
 		await vscode.window.withProgress({
 			location: vscode.ProgressLocation.Notification,
-			title: `Extracting ${source.name}`
+			title: `Extracting ${source.label}`
 		}, async (progress) => {
 			progress.report({ increment: 0, message: 'Sit and relax...' });
-			await ruyisdk.extract(source.name, path.path);
+			await ruyisdk.extract(source.label, path.path);
 			progress.report({ increment: 100, });
 		});
 
@@ -201,10 +197,10 @@ function projectInit(context: vscode.ExtensionContext) {
 		}
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('ruyisdk.createProject', async () => {
-		// const models = JSON.parse(fs.readFileSync(context.extensionPath + '/resources/models.json', 'utf-8'));
-		// const model = await vscode.window.showQuickPick(models, {
-		// 	placeHolder: 'Select a model'
-		// });
+		const models = JSON.parse(fs.readFileSync(context.extensionPath + '/resources/models.json', 'utf-8'));
+		const model = await vscode.window.showQuickPick(models, {
+			placeHolder: 'Select a model'
+		});
 	}));
 }
 
