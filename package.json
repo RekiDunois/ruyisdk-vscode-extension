@@ -3,6 +3,10 @@
   "displayName": "RuyiSDK",
   "description": "",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ruyisdk/ruyisdk-vscode-extension"
+  },
   "engines": {
     "vscode": "^1.87.0"
   },
