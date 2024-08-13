@@ -1,7 +1,7 @@
 import { spawn } from 'child_process';
 
-async function runCommand(args: string[], workdir?: string): Promise<string> {
-	const command = process.platform === 'linux' ? 'ruyi' : 'ruyi';
+export async function runCommand(args: string[], workdir?: string): Promise<string[]> {
+    const command = process.platform === 'linux' ? 'ruyi' : 'ruyi';
 	const ruyi = spawn(command, ['--porcelain', ...args], {
         cwd: workdir,
     });
@@ -19,10 +19,11 @@ async function runCommand(args: string[], workdir?: string): Promise<string> {
         ruyi.on('close', (_) => {
             if (error) {
                 console.log(stderr.trim());
-                resolve(stderr.trim()); // don't reject
+                resolve(stderr.trim().split('\n')); // don't reject
             }
             console.log(stdout.trim());
-            resolve(stdout.trim());
+            const output = stdout.trim().split('\n');
+            resolve(output);
         });
     });
 }
