@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import * as ruyisdk from './riyisdk';
+import * as ruyisdk from './ruyisdk';
 
 function packageInit() {
 	const packages = ruyisdk.installablePackages();
