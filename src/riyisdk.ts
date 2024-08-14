@@ -1,4 +1,24 @@
-import { runCommand } from './utils'
+import { runCommand } from "./utils";
+
+export async function runRuyi(args: string[], workdir?: string): Promise<string[]> {
+    const command = process.platform === 'linux' ? 'ruyi' : 'ruyi';
+    console.log('run ruyi with arg: ', args)
+    const result = (await runCommand(command, ['--porcelain', ...args], {
+        cwd: workdir,
+    })).split('\n')
+
+    result.forEach((value) => {
+        try {
+            console.log(JSON.parse(value))
+        } catch (error) {
+            console.log(value)
+        }
+    })
+
+    return new Promise((resolve, rejects) => {
+        resolve(result)
+    })
+}
 
 export interface News {
     ty: string;
@@ -30,19 +50,19 @@ export interface Package {
 }
 
 export async function profiles(): Promise<string[]> {
-    const commandResult = await runCommand(['list', 'profiles']);
+    const commandResult = await runRuyi(['list', 'profiles']);
     return commandResult.map(profile => profile.split(' ')[0]);
 }
 
 export async function news(): Promise<News[]> {
-    const newsNd = await runCommand(['news', 'list']);
+    const newsNd = await runRuyi(['news', 'list']);
     return newsNd.map(news => {
         return JSON.parse(news);
     });
 }
 
 export async function packages(): Promise<Package[]> {
-    const packagesNd = await runCommand(['list']);
+    const packagesNd = await runRuyi(['list']);
     return packagesNd.map(package_ => {
         return JSON.parse(package_);
     });
@@ -69,7 +89,7 @@ export async function installablePackages(): Promise<Package[]> {
 export async function venv(name: string, profile: string, toolchain: string, sysroot?: string): Promise<string[]> {
     let args = ['venv', profile, name, '-t', toolchain];
     if (sysroot) args.push('--sysroot-from', sysroot);
-    return await runCommand(args);
+    return await runRuyi(args);
 }
 
 export async function install(package_: string, ver?: string): Promise<string[]> {
@@ -79,9 +99,9 @@ export async function install(package_: string, ver?: string): Promise<string[]>
     } else {
         args.push(package_);
     }
-    return await runCommand(args);
+    return await runRuyi(args);
 }
 
 export async function extract(package_: string, workdir: string): Promise<string[]> {
-    return await runCommand(['extract', package_], workdir);
+    return await runRuyi(['extract', package_], workdir);
 }

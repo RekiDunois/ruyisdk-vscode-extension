@@ -1,36 +1,25 @@
-import { spawn } from 'child_process';
+import { spawn, SpawnOptionsWithoutStdio } from 'child_process';
 
-export async function runCommand(args: string[], workdir?: string): Promise<string[]> {
-    const command = process.platform === 'linux' ? 'ruyi' : 'ruyi';
-    console.log('run ruyi with arg: ', args)
-	const ruyi = spawn(command, ['--porcelain', ...args], {
-        cwd: workdir,
-    });
-    return new Promise((resolve, reject) => {
+export async function runCommand(command: string, args: string[], option?: SpawnOptionsWithoutStdio): Promise<string>
+{
+    const result = spawn(command, args, option)
+    return new Promise((resolve, rejects) => {
         let stdout = '';
         let stderr = '';
         let error = false;
-        ruyi.stdout.on('data', (data) => {
+        result.stdout.on('data', (data) => {
             stdout += data;
         });
-        ruyi.stderr.on('data', (data) => {
+        result.stderr.on('data', (data) => {
             stderr += data;
             error = true;
         });
-        ruyi.on('close', (_) => {
+        result.on('close', (_) => {
             if (error) {
                 console.log(stderr.trim());
-                resolve(stderr.trim().split('\n')); // don't reject
+                resolve(stderr.trim()); // don't reject
             }
-            const output = stdout.trim().split('\n');
-            output.forEach((value) => {
-                try {
-                    console.log(JSON.parse(value))
-                } catch (error) {
-                    console.log(value)
-                }
-            })
-            resolve(output);
-        });
-    });
-}
+            resolve(stdout.trim());
+        })
+    })
+};
